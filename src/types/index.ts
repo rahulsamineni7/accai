@@ -2,8 +2,12 @@ export type LegalEntity = {
   id: string;
   name: string;
   slug: string;
-  type: string; // e.g. "Delaware C-Corp"
+  type: string; // e.g. "Private Limited (India)" or "Delaware C-Corp"
   ein: string;
+  cin?: string; // Corporate Identification Number (India)
+  pan?: string; // Permanent Account Number (India)
+  gstin?: string; // Goods and Services Tax Identification Number (India)
+  state?: string; // e.g. "29-Karnataka"
   currency: string;
   fiscalYearEnd: string;
   accountingMethod: 'Accrual' | 'Cash';
@@ -66,6 +70,19 @@ export type Bill = {
   status: 'Draft' | 'Awaiting Approval' | 'Scheduled' | 'Paid';
   paymentAccount?: string;
   attachmentName?: string;
+  // Indian Compliance & GST
+  gstin?: string;
+  hsnSac?: string;
+  taxableAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  igst?: number;
+  tdsSection?: '194J' | '194C' | '194I' | '194Q' | 'None';
+  tdsRate?: number;
+  tdsAmount?: number;
+  netPayable?: number;
+  gstr2bMatchStatus?: 'Matched' | 'Pending In Portal' | 'Mismatch' | 'Not Uploaded';
+  itcEligible?: boolean;
 };
 
 export type Invoice = {
@@ -76,7 +93,29 @@ export type Invoice = {
   dueDate: string;
   amount: number;
   status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
-  items: { description: string; quantity: number; unitPrice: number; total: number }[];
+  items: { description: string; quantity: number; unitPrice: number; total: number; hsnSac?: string; gstRate?: number }[];
+  // Indian GST & E-Invoicing
+  gstin?: string;
+  placeOfSupply?: string;
+  taxableAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  igst?: number;
+  irn?: string; // E-Invoice 64-char Invoice Reference Number
+  irnStatus?: 'Generated' | 'Pending' | 'Exempt';
+  ewayBillNumber?: string;
+  upiId?: string; // e.g. "acmetech@hdfcbank"
+  upiQrString?: string;
+};
+
+export type GSTFilingPeriod = {
+  month: string; // e.g. "October 2024"
+  gstr1Status: 'Filed' | 'Ready to File' | 'Draft';
+  gstr3bStatus: 'Filed' | 'Ready to File' | 'Draft';
+  gstr2bItcTotal: number;
+  gstr2bMatchedPercent: number;
+  totalOutwardTax: number;
+  netTaxPayable: number;
 };
 
 export type CloseTask = {

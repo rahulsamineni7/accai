@@ -1,10 +1,39 @@
 # AccAI — Autonomous Accounting & General Ledger Platform
+### *The Hybrid of Digits AI & HisabKitab for Indian Companies*
 
-> An AI-native autonomous general ledger and financial intelligence platform inspired by Digits AI and modern cloud accounting infrastructure. Styled with high-precision frosted glass aesthetics, emerald botanical gradients, and real-time dual-entry accounting mechanics.
+> An AI-native autonomous general ledger, tax compliance, and financial intelligence platform designed to capture the best of **Silicon Valley's autonomous GL intelligence (Digits AI)** and **India's statutory tax & business compliance ecosystem (HisabKitab)**. Styled with high-precision frosted glass aesthetics, emerald botanical gradients, real-time dual-entry accounting mechanics, and complete Indian GST/TDS/Tally compliance.
 
 ---
 
-## ⚡ Live Features
+## 🇮🇳 Indian Compliance & HisabKitab Hybrid Features
+
+### 1. 🛡️ Comprehensive GST & Tax Compliance Suite
+- **GSTR-2B AI Input Tax Credit (ITC) Matcher**: Automates the matching of purchase bills against GSTN 2B portal data to eliminate ITC leakage and verify supplier filings.
+- **GSTR-1 Outward Supplies Engine**: Table 4A (B2B Taxable), Table 6A (Zero-rated export), Table 12 (HSN Summary). Direct **1-Click Official JSON download** for `gst.gov.in` portal upload.
+- **GSTR-3B Auto-Computation Return**: Table 3.1 outward liabilities, Table 4 eligible ITC, Table 6 payment of tax with electronic cash/credit ledger offsets.
+- **NIC E-Invoicing (IRN) & Signed QR Codes**: Generates 64-character SHA-256 IRN hashes and official high-density signed QR codes for B2B invoices.
+- **E-Way Bill Generation**: Part A & Part B vehicle number linkage (`KA-01-AB-1234`) for high-value logistics consignments.
+
+### 2. 📑 TDS & Form 26Q Compliance Hub
+- **Statutory Section Tracking**: Section 194J (10%/2% Tech & Professional), Section 194C (1%/2% Contractors), Section 194I (10%/2% Rent), Section 194Q.
+- **Challan ITNS 281 Payment Generator**: Monthly BSR code tracking and tax payment slips.
+- **Form 26Q Quarterly Return Export**: TRACES / NSDL RPU-compatible data export with 100% vendor PAN validation.
+- **Vendor Form 16A Certificates**: Instant generation of quarterly TDS deduction certificates for vendors.
+
+### 3. 🔄 Tally Prime & Indian CA Export Bridge
+- **1-Click Tally XML Voucher Serialization**: Exports Payment, Receipt, Sales, and Purchase vouchers with exact TDL XML `<ENVELOPE>` tags. Chartered Accountants can import directly into Tally Prime 4.0/3.0 in seconds!
+- **Schedule III Division II Balance Sheet**: Indian Companies Act 2013 compliant grouping for private limited companies and statutory audits.
+- **Trial Balance CA Audit Pack**: Pre-formatted CSV/Excel audit pack ready for statutory auditors.
+
+### 4. ⚡ Indian Invoicing, UPI & WhatsApp Rails
+- **Dynamic UPI QR Codes**: Invoices feature instant scan-to-pay QR codes compatible with PhonePe, Google Pay, Paytm, and CRED.
+- **1-Click WhatsApp Invoice Sharing**: Dispatches tax invoices directly via WhatsApp (`wa.me`) with pre-filled payment links and GST summaries.
+- **HSN & SAC Code Catalog**: Built-in support for service accounting codes (e.g. `SAC 998314` for Cloud/AI, `SAC 998313` for Software Dev).
+- **Dual Currency Switcher**: Instant global toggle between **INR (₹)** with Indian numbering (Lakhs & Crores) and **USD ($)**.
+
+---
+
+## ⚡ Core Autonomous Ledger Features (Digits AI Intelligence)
 
 ### 1. 📊 Interactive Chart of Accounts
 - **6 GAAP Hierarchy Groups**: 1000 Assets, 2000 Liabilities, 3000 Equity, 4000 Revenue, 5000 COGS, 6000 Operating Expenses.
@@ -100,3 +129,4 @@ npm run build
 
 ## 📄 License
 MIT License. Built for demo and educational purposes.
+

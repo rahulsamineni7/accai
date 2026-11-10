@@ -31,7 +31,8 @@ export const AskDigitsModal: React.FC = () => {
     bills,
     invoices,
     currentEntity,
-    apiKey
+    apiKey,
+    formatAmount
   } = useDigits();
 
   const [input, setInput] = useState('');
@@ -40,13 +41,13 @@ export const AskDigitsModal: React.FC = () => {
     {
       id: 'm-1',
       sender: 'assistant',
-      text: `Hello Rahul. I am **Ask Digits**, powered by **Google Gemini 2.5 Flash** and grounded in your live ${currentEntity.name} General Ledger.\n\nAsk me any real-time question about cash flow, runway projections, vendor spend, P&L anomalies, or tax line items.`,
+      text: `Hello Rahul. I am **Ask AccAI (Digits × HisabKitab)**, powered by **Google Gemini 2.5 Flash** and grounded in your live ${currentEntity.name} General Ledger and Indian GST/TDS registers.\n\nAsk me any real-time question about cash flow, GSTR-2B input credit, Section 194J/194C TDS deductions, runway projections, or Tally Prime exports.`,
       dataCard: {
         title: 'Autonomous Ledger Live Snapshot',
         items: [
-          { label: 'Total Cash Balance', value: `$${metrics.totalCash.toLocaleString()}`, color: 'text-[#006c49]' },
+          { label: 'Total Cash Balance', value: formatAmount(metrics.totalCash), color: 'text-[#006c49]' },
           { label: 'Calculated Runway', value: `${metrics.runwayMonths} months`, color: 'text-[#006948]' },
-          { label: 'Monthly Net Burn', value: `-$${Math.abs(metrics.netBurn).toLocaleString()}`, color: 'text-[#ba1a1a]' },
+          { label: 'Monthly Net Burn', value: `-${formatAmount(Math.abs(metrics.netBurn))}`, color: 'text-[#ba1a1a]' },
           { label: 'Gross Margin', value: `${metrics.grossMarginPercent}%`, color: 'text-[#006c49]' }
         ]
       }
@@ -56,11 +57,12 @@ export const AskDigitsModal: React.FC = () => {
   if (!isAskDigitsOpen) return null;
 
   const quickPrompts = [
+    'Reconcile GSTR-2B Input Tax Credit',
+    'Calculate Q3 Advance Tax liability',
+    'Check Section 194J TDS deductions on tech vendors',
     'What is our runway and zero cash date?',
     'Break down software & SaaS subscriptions',
-    'Why is net burn higher this month?',
-    'Show un-reconciled transactions',
-    'What was our highest vendor expense?'
+    'Generate Tally Prime XML for CA audit'
   ];
 
   const handleSend = async (queryText?: string) => {

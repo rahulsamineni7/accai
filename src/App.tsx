@@ -17,6 +17,9 @@ import { VaultView } from './components/views/VaultView';
 import { DirectoryView } from './components/views/DirectoryView';
 import { IntegrationsView } from './components/views/IntegrationsView';
 import { SettingsView } from './components/views/SettingsView';
+import { GSTComplianceView } from './components/views/GSTComplianceView';
+import { TDSComplianceView } from './components/views/TDSComplianceView';
+import { TallyBridgeView } from './components/views/TallyBridgeView';
 import { CheckCircle2, Sparkles, PanelLeft } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
@@ -42,6 +45,12 @@ const MainLayout: React.FC = () => {
         return <BillPayView />;
       case 'invoices':
         return <InvoicingView />;
+      case 'gst':
+        return <GSTComplianceView />;
+      case 'tds':
+        return <TDSComplianceView />;
+      case 'tally-bridge':
+        return <TallyBridgeView />;
       case 'checklist':
         return <ChecklistView />;
       case 'vault':

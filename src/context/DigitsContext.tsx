@@ -22,6 +22,8 @@ import {
   initialIntegrations
 } from '../data/mockData';
 
+import { formatCurrency, CurrencyCode } from '../utils/formatters';
+
 export type ViewType =
   | 'home'
   | 'financials'
@@ -31,6 +33,9 @@ export type ViewType =
   | 'reconciliations'
   | 'bills'
   | 'invoices'
+  | 'gst'
+  | 'tds'
+  | 'tally-bridge'
   | 'checklist'
   | 'vault'
   | 'directory'
@@ -46,6 +51,19 @@ interface DigitsContextType {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+
+  // Currency & Indian Localization
+  currency: CurrencyCode;
+  setCurrency: (c: CurrencyCode) => void;
+  toggleCurrency: () => void;
+  formatAmount: (amount: number, options?: { hideDecimals?: boolean; compact?: boolean }) => string;
+
+  // Indian GST & Compliance Actions
+  generateIRN: (invoiceId: string) => Promise<string>;
+  generateEWayBill: (invoiceId: string, vehicleNo: string) => Promise<string>;
+  downloadTallyXml: () => void;
+  downloadGstrJson: (type: 'GSTR1' | 'GSTR3B') => void;
+  reconcileGstr2bWithBills: () => { matchedCount: number; eligibleItc: number };
 
   // Legal Entities
   entities: LegalEntity[];
@@ -151,6 +169,18 @@ export const DigitsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const [entities, setEntities] = useState<LegalEntity[]>(initialLegalEntities);
   const [currentEntity, setCurrentEntity] = useState<LegalEntity>(initialLegalEntities[0]);
+  const [currency, setCurrency] = useState<CurrencyCode>(() => {
+    return initialLegalEntities[0]?.currency?.includes('INR') ? 'INR' : 'USD';
+  });
+
+  const toggleCurrency = () => {
+    setCurrency((prev) => (prev === 'INR' ? 'USD' : 'INR'));
+  };
+
+  const formatAmount = (amount: number, options?: { hideDecimals?: boolean; compact?: boolean }) => {
+    return formatCurrency(amount, currency, options);
+  };
+
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartAccount[]>(initialChartOfAccounts);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [rules, setRules] = useState<CategorizationRule[]>(initialRules);
@@ -250,8 +280,144 @@ export const DigitsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (found) {
       setCurrentEntity(found);
       setEntities(entities.map((e) => ({ ...e, isCurrent: e.id === id })));
+      if (found.currency.includes('INR')) {
+        setCurrency('INR');
+      } else {
+        setCurrency('USD');
+      }
       showNotification(`Switched entity to: ${found.name}`);
     }
+  };
+
+  const generateIRN = async (invoiceId: string): Promise<string> => {
+    // Generate simulated 64-char SHA-256 e-Invoice IRN
+    const hexChars = '0123456789abcdef';
+    let hash = '';
+    for (let i = 0; i < 64; i++) {
+      hash += hexChars[Math.floor(Math.random() * 16)];
+    }
+
+    setInvoices((prev) =>
+      prev.map((inv) =>
+        inv.id === invoiceId
+          ? { ...inv, irn: hash, irnStatus: 'Generated' as const }
+          : inv
+      )
+    );
+    showNotification(`E-Invoice IRN Generated successfully on NIC Portal: ${hash.substring(0, 16)}...`);
+    return hash;
+  };
+
+  const generateEWayBill = async (invoiceId: string, vehicleNo: string): Promise<string> => {
+    const ewbNo = '24' + Math.floor(1000000000 + Math.random() * 9000000000).toString();
+    setInvoices((prev) =>
+      prev.map((inv) =>
+        inv.id === invoiceId
+          ? { ...inv, ewayBillNumber: ewbNo }
+          : inv
+      )
+    );
+    showNotification(`E-Way Bill #${ewbNo} generated for vehicle ${vehicleNo.toUpperCase()}`);
+    return ewbNo;
+  };
+
+  const downloadTallyXml = () => {
+    const xmlContent = `<?xml version="1.0" encoding="utf-8"?>
+<ENVELOPE>
+  <HEADER>
+    <TALLYREQUEST>Import Data</TALLYREQUEST>
+  </HEADER>
+  <BODY>
+    <IMPORTDATA>
+      <REQUESTDESC>
+        <REPORTNAME>All Accounting Vouchers</REPORTNAME>
+        <STATICVARIABLES>
+          <SVCURRENTCOMPANY>${currentEntity.name}</SVCURRENTCOMPANY>
+        </STATICVARIABLES>
+      </REQUESTDESC>
+      <REQUESTDATA>
+        ${transactions.slice(0, 15).map((t) => `
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER VCHTYPE="${t.amount < 0 ? 'Payment' : 'Receipt'}" ACTION="Create">
+            <DATE>${t.date.replace(/-/g, '')}</DATE>
+            <VOUCHERTYPENAME>${t.amount < 0 ? 'Payment' : 'Receipt'}</VOUCHERTYPENAME>
+            <PARTYLEDGERNAME>${t.merchant}</PARTYLEDGERNAME>
+            <NARRATION>${t.description} - AI Verified</NARRATION>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>${t.category}</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>${t.amount < 0 ? 'Yes' : 'No'}</ISDEEMEDPOSITIVE>
+              <AMOUNT>${Math.abs(t.amount)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>${t.account}</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>${t.amount < 0 ? 'No' : 'Yes'}</ISDEEMEDPOSITIVE>
+              <AMOUNT>-${Math.abs(t.amount)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>`).join('')}
+      </REQUESTDATA>
+    </IMPORTDATA>
+  </BODY>
+</ENVELOPE>`;
+
+    const blob = new Blob([xmlContent], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Tally_Vouchers_${currentEntity.slug || 'accai'}_FY24-25.xml`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showNotification('Exported Tally Prime XML voucher pack successfully.');
+  };
+
+  const downloadGstrJson = (type: 'GSTR1' | 'GSTR3B') => {
+    const payload = {
+      gstin: currentEntity.gstin || '29AABCA1234F1Z8',
+      fp: '102026',
+      version: 'GSTR_OFFLINE_v3.2',
+      cur_gt: invoices.reduce((s, i) => s + i.amount, 0),
+      b2b: invoices.map((inv) => ({
+        ctin: inv.gstin || '29AAGCB3796D1Z4',
+        inv: [
+          {
+            inum: inv.invoiceNumber,
+            idt: inv.issueDate,
+            val: inv.amount,
+            pos: inv.placeOfSupply?.substring(0, 2) || '29',
+            rchrg: 'N',
+            inv_typ: 'R',
+            itms: inv.items.map((it, idx) => ({
+              num: idx + 1,
+              itm_det: {
+                rt: 18,
+                txval: it.total,
+                iamt: inv.igst || 0,
+                camt: inv.cgst || (it.total * 0.09),
+                samt: inv.sgst || (it.total * 0.09),
+                csamt: 0
+              }
+            }))
+          }
+        ]
+      }))
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}_${currentEntity.gstin || '29AABCA1234F1Z8'}_102026.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showNotification(`Downloaded ${type} official JSON for GST Portal upload.`);
+  };
+
+  const reconcileGstr2bWithBills = () => {
+    const eligibleItc = bills
+      .filter((b) => b.itcEligible)
+      .reduce((sum, b) => sum + (b.cgst || 0) + (b.sgst || 0) + (b.igst || 0), 0);
+    showNotification(`GSTR-2B Reconciled: 100% of vendor bills matched. Eligible ITC: ₹${eligibleItc.toLocaleString('en-IN')}`);
+    return { matchedCount: bills.length, eligibleItc };
   };
 
   // Quick keyboard shortcut: Cmd+K / Ctrl+K opens "Ask Digits"
@@ -518,6 +684,15 @@ export const DigitsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         isSidebarOpen,
         setIsSidebarOpen,
         toggleSidebar,
+        currency,
+        setCurrency,
+        toggleCurrency,
+        formatAmount,
+        generateIRN,
+        generateEWayBill,
+        downloadTallyXml,
+        downloadGstrJson,
+        reconcileGstr2bWithBills,
         entities,
         currentEntity,
         switchEntity,

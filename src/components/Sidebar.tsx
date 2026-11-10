@@ -15,7 +15,10 @@ import {
   Settings,
   ArrowUpRight,
   ChevronDown,
-  PanelLeftClose
+  PanelLeftClose,
+  ShieldCheck,
+  Binary,
+  Percent
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -63,6 +66,14 @@ export const Sidebar: React.FC = () => {
         { id: 'bills', label: 'Bill Pay (AP)', icon: Receipt },
         { id: 'invoices', label: 'Invoicing (AR)', icon: ArrowUpRight },
         { id: 'integrations', label: 'Feeds & Stack', icon: Network }
+      ]
+    },
+    {
+      section: 'INDIAN COMPLIANCE (HISABKITAB)',
+      items: [
+        { id: 'gst', label: 'GST & Tax Suite', icon: ShieldCheck, badge: 'GSTR-2B', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
+        { id: 'tds', label: 'TDS & Form 26Q', icon: Percent, badge: '194J', badgeColor: 'bg-[#3b82f6]/15 text-[#3b82f6]' },
+        { id: 'tally-bridge', label: 'Tally & CA Bridge', icon: Binary, badge: 'XML', badgeColor: 'bg-[#ea580c]/15 text-[#ea580c]' }
       ]
     },
     {

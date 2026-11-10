@@ -30,7 +30,9 @@ export const Header: React.FC<HeaderProps> = ({
     setActiveView,
     metrics,
     isSidebarOpen,
-    toggleSidebar
+    toggleSidebar,
+    currency,
+    toggleCurrency
   } = useDigits();
 
   const [isNewMenuOpen, setIsNewMenuOpen] = useState(false);
@@ -88,6 +90,17 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-[#6d7a72] text-xs">•</span>
           <span className="text-xs font-mono text-[#006c49] font-bold">99.4% Confidence</span>
         </div>
+
+        {/* Currency Switcher: INR (₹) / USD ($) */}
+        <button
+          onClick={toggleCurrency}
+          title="Toggle Indian Rupee (₹) / US Dollar ($)"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-[#eaedff] border border-[#eaedff] transition-all text-xs font-mono font-bold active:scale-95"
+        >
+          <span className={currency === 'INR' ? 'text-[#006948] font-bold' : 'text-[#6d7a72]'}>₹ INR</span>
+          <span className="text-[#6d7a72] text-[10px]">/</span>
+          <span className={currency === 'USD' ? 'text-[#006948] font-bold' : 'text-[#6d7a72]'}>$ USD</span>
+        </button>
 
         {/* "+ New Journal Entry" Action Button */}
         <div className="relative">
