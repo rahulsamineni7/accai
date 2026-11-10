@@ -234,3 +234,4 @@ export const TallyBridgeView: React.FC = () => {
     </div>
   );
 };
+

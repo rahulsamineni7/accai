@@ -85,3 +85,4 @@ export function getIndianStateFromGSTIN(gstin: string): string {
   };
   return stateMap[stateCode] || 'Other State';
 }
+

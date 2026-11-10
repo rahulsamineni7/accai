@@ -18,7 +18,12 @@ import {
   PanelLeftClose,
   ShieldCheck,
   Binary,
-  Percent
+  Percent,
+  Clock,
+  ShieldAlert,
+  FileSearch,
+  History,
+  Boxes
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -65,6 +70,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { id: 'bills', label: 'Bill Pay (AP)', icon: Receipt },
         { id: 'invoices', label: 'Invoicing (AR)', icon: ArrowUpRight },
+        { id: 'inventory-pos', label: 'Inventory (3-UOM) & POS', icon: Boxes, badge: 'POS', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
         { id: 'integrations', label: 'Feeds & Stack', icon: Network }
       ]
     },
@@ -72,7 +78,11 @@ export const Sidebar: React.FC = () => {
       section: 'INDIAN COMPLIANCE (HISABKITAB)',
       items: [
         { id: 'gst', label: 'GST & Tax Suite', icon: ShieldCheck, badge: 'GSTR-2B', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
+        { id: 'gst-ims', label: 'GSTN IMS & Notice Shield', icon: ShieldAlert, badge: 'DRC-01C', badgeColor: 'bg-[#ba1a1a]/15 text-[#ba1a1a]' },
+        { id: 'msme-guard', label: 'MSME 15/45d Guard', icon: Clock, badge: 'Sec 37', badgeColor: 'bg-[#ea580c]/15 text-[#ea580c]' },
         { id: 'tds', label: 'TDS & Form 26Q', icon: Percent, badge: '194J', badgeColor: 'bg-[#3b82f6]/15 text-[#3b82f6]' },
+        { id: 'ledger-scrutiny', label: 'CA Ledger Scrutiny', icon: FileSearch, badge: '24/7 AI', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
+        { id: 'audit-trail', label: 'Rule 11(g) Audit Trail', icon: History, badge: 'MCA', badgeColor: 'bg-[#131b2e]/10 text-[#131b2e]' },
         { id: 'tally-bridge', label: 'Tally & CA Bridge', icon: Binary, badge: 'XML', badgeColor: 'bg-[#ea580c]/15 text-[#ea580c]' }
       ]
     },

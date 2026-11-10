@@ -18,14 +18,60 @@ import { DirectoryView } from './components/views/DirectoryView';
 import { IntegrationsView } from './components/views/IntegrationsView';
 import { SettingsView } from './components/views/SettingsView';
 import { GSTComplianceView } from './components/views/GSTComplianceView';
+import { GSTIMSView } from './components/views/GSTIMSView';
+import { MSMEGuardView } from './components/views/MSMEGuardView';
 import { TDSComplianceView } from './components/views/TDSComplianceView';
+import { LedgerScrutinyView } from './components/views/LedgerScrutinyView';
+import { AuditTrailView } from './components/views/AuditTrailView';
 import { TallyBridgeView } from './components/views/TallyBridgeView';
-import { CheckCircle2, Sparkles, PanelLeft } from 'lucide-react';
+import { InventoryPOSView } from './components/views/InventoryPOSView';
+import { TallyKeyboardCheatSheet } from './components/TallyKeyboardCheatSheet';
+import { CheckCircle2, Sparkles, PanelLeft, Keyboard } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
-  const { activeView, notification, isSidebarOpen, toggleSidebar } = useDigits();
+  const { activeView, setActiveView, notification, isSidebarOpen, toggleSidebar } = useDigits();
 
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
+  const [isCheatSheetOpen, setIsCheatSheetOpen] = useState(false);
+
+  // Global Tally Muscle-Memory Keyboard Listener
+  React.useEffect(() => {
+    const handleTallyKeys = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input or textarea
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
+
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setIsCheatSheetOpen((prev) => !prev);
+      } else if (e.key === 'F4') {
+        e.preventDefault();
+        setActiveView('reconciliations');
+      } else if (e.key === 'F5') {
+        e.preventDefault();
+        setActiveView('bills');
+      } else if (e.key === 'F6') {
+        e.preventDefault();
+        setActiveView('transactions');
+      } else if (e.key === 'F7') {
+        e.preventDefault();
+        setActiveView('rules');
+      } else if (e.key === 'F8') {
+        e.preventDefault();
+        setActiveView('invoices');
+      } else if (e.key === 'F9') {
+        e.preventDefault();
+        setActiveView('bills');
+      } else if (e.altKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        setIsNewTxOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleTallyKeys);
+    return () => window.removeEventListener('keydown', handleTallyKeys);
+  }, [setActiveView]);
 
   const renderActiveView = () => {
     switch (activeView) {
@@ -45,10 +91,20 @@ const MainLayout: React.FC = () => {
         return <BillPayView />;
       case 'invoices':
         return <InvoicingView />;
+      case 'inventory-pos':
+        return <InventoryPOSView />;
       case 'gst':
         return <GSTComplianceView />;
+      case 'gst-ims':
+        return <GSTIMSView />;
+      case 'msme-guard':
+        return <MSMEGuardView />;
       case 'tds':
         return <TDSComplianceView />;
+      case 'ledger-scrutiny':
+        return <LedgerScrutinyView />;
+      case 'audit-trail':
+        return <AuditTrailView />;
       case 'tally-bridge':
         return <TallyBridgeView />;
       case 'checklist':
@@ -90,6 +146,18 @@ const MainLayout: React.FC = () => {
       {/* Modals */}
       <AskDigitsModal />
       <NewTransactionModal isOpen={isNewTxOpen} onClose={() => setIsNewTxOpen(false)} />
+      <TallyKeyboardCheatSheet isOpen={isCheatSheetOpen} onClose={() => setIsCheatSheetOpen(false)} />
+
+      {/* Tally Keyboard Shortcut Trigger Pill on Bottom */}
+      <button
+        onClick={() => setIsCheatSheetOpen(true)}
+        title="Tally Prime Keyboard Shortcuts (?)"
+        className="fixed bottom-6 right-20 z-40 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-xl border border-[#eaedff] shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:bg-[#f2f3ff] text-[#131b2e] flex items-center gap-1.5 text-xs font-semibold transition-all active:scale-95"
+      >
+        <Keyboard className="w-3.5 h-3.5 text-[#006948]" />
+        <span>Tally Keys</span>
+        <span className="text-[10px] font-mono text-[#6d7a72] bg-[#eaedff] px-1 rounded">?</span>
+      </button>
 
       {/* Floating Re-open Sidebar Pill when collapsed */}
       {!isSidebarOpen && (
