@@ -23,7 +23,10 @@ import {
   ShieldAlert,
   FileSearch,
   History,
-  Boxes
+  Boxes,
+  Brain,
+  Building2,
+  Layers
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -62,6 +65,7 @@ export const Sidebar: React.FC = () => {
         { id: 'chart-of-accounts', label: 'Chart of Accounts', icon: FileCheck2 },
         { id: 'transactions', label: 'Transactions', icon: DollarSign },
         { id: 'rules', label: 'Rules Engine', icon: Sliders },
+        { id: 'schedules', label: 'Schedules & Assets', icon: Layers, badge: 'WDV', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
         { id: 'reconciliations', label: 'Reconciliations', icon: Scale }
       ]
     },
@@ -77,6 +81,7 @@ export const Sidebar: React.FC = () => {
     {
       section: 'INDIAN COMPLIANCE (HISABKITAB)',
       items: [
+        { id: 'practice-portal', label: 'CA Practice Portal', icon: Building2, badge: 'Multi-SME', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
         { id: 'gst', label: 'GST & Tax Suite', icon: ShieldCheck, badge: 'GSTR-2B', badgeColor: 'bg-[#006948]/15 text-[#006948]' },
         { id: 'gst-ims', label: 'GSTN IMS & Notice Shield', icon: ShieldAlert, badge: 'DRC-01C', badgeColor: 'bg-[#ba1a1a]/15 text-[#ba1a1a]' },
         { id: 'msme-guard', label: 'MSME 15/45d Guard', icon: Clock, badge: 'Sec 37', badgeColor: 'bg-[#ea580c]/15 text-[#ea580c]' },
@@ -89,9 +94,10 @@ export const Sidebar: React.FC = () => {
     {
       section: 'INTELLIGENCE & AUDIT',
       items: [
+        { id: 'ai-memory', label: 'AI Memory (4-Tier)', icon: Brain, badge: 'pgvector', badgeColor: 'bg-[#6cf8bb]/40 text-[#00714d]' },
         { id: 'checklist', label: 'Month-End Close', icon: FileCheck2 },
         { id: 'vault', label: 'Documents & OCR', icon: FolderArchive },
-        { id: 'directory', label: 'Directory', icon: Users2 },
+        { id: 'directory', label: 'Parties & Semantic Graph', icon: Users2 },
         { id: 'settings', label: 'Ledger Settings', icon: Settings }
       ]
     }

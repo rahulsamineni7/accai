@@ -77,3 +77,4 @@ export const TallyKeyboardCheatSheet: React.FC<TallyKeyboardCheatSheetProps> = (
     </div>
   );
 };
+

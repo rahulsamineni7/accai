@@ -138,3 +138,4 @@ function formatPartyName(name: string): string {
     .replace(/(^\w|\s\w)/g, (m) => m.toUpperCase())
     .trim();
 }
+

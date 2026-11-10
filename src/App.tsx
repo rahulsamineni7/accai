@@ -25,6 +25,9 @@ import { LedgerScrutinyView } from './components/views/LedgerScrutinyView';
 import { AuditTrailView } from './components/views/AuditTrailView';
 import { TallyBridgeView } from './components/views/TallyBridgeView';
 import { InventoryPOSView } from './components/views/InventoryPOSView';
+import { SchedulesView } from './components/views/SchedulesView';
+import { PracticePortalView } from './components/views/PracticePortalView';
+import { AIMemoryView } from './components/views/AIMemoryView';
 import { TallyKeyboardCheatSheet } from './components/TallyKeyboardCheatSheet';
 import { CheckCircle2, Sparkles, PanelLeft, Keyboard } from 'lucide-react';
 
@@ -87,6 +90,8 @@ const MainLayout: React.FC = () => {
         return <ChartOfAccountsView />;
       case 'rules':
         return <RulesEngineView />;
+      case 'schedules':
+        return <SchedulesView />;
       case 'bills':
         return <BillPayView />;
       case 'invoices':
@@ -105,6 +110,10 @@ const MainLayout: React.FC = () => {
         return <LedgerScrutinyView />;
       case 'audit-trail':
         return <AuditTrailView />;
+      case 'practice-portal':
+        return <PracticePortalView />;
+      case 'ai-memory':
+        return <AIMemoryView />;
       case 'tally-bridge':
         return <TallyBridgeView />;
       case 'checklist':
