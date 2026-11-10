@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Sparkles,
   ArrowRight,
@@ -19,9 +19,11 @@ import {
   HelpCircle,
   MessageCircle,
   Clock,
-  ExternalLink
+  ExternalLink,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useDigits } from '../context/DigitsContext';
+import { parseExcelOrCsv } from '../utils/excelParser';
 
 interface FinBooksLandingProps {
   onLaunchApp: () => void;
@@ -107,7 +109,8 @@ const SAMPLE_DOCS: SampleDoc[] = [
 ];
 
 export const FinBooksLanding: React.FC<FinBooksLandingProps> = ({ onLaunchApp }) => {
-  const { downloadTallyXml, addTransaction } = useDigits();
+  const { downloadTallyXml, addTransaction, showNotification } = useDigits();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Interactive Live Document Sandbox State
   const [selectedDoc, setSelectedDoc] = useState<SampleDoc>(SAMPLE_DOCS[0]);
@@ -134,6 +137,55 @@ export const FinBooksLanding: React.FC<FinBooksLandingProps> = ({ onLaunchApp })
       setProcessingStep(4);
       setIsProcessing(false);
     }, 1500);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessing(true);
+    setProcessingStep(1);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const buffer = evt.target?.result as ArrayBuffer;
+        const result = parseExcelOrCsv(buffer, file.name);
+
+        if (result.transactions.length > 0) {
+          const firstTx = result.transactions[0];
+          const newDoc: SampleDoc = {
+            id: `upload-${Date.now()}`,
+            name: file.name,
+            type: file.name.endsWith('.xlsx') || file.name.endsWith('.xls') ? 'Excel Workbook' : 'CSV Statement',
+            vendor: firstTx.merchant,
+            gstin: '29AAACH2702H1ZQ',
+            taxable: Math.abs(firstTx.amount),
+            tax: Math.round(Math.abs(firstTx.amount) * 0.18),
+            taxRate: '18% GST',
+            total: Math.abs(firstTx.amount),
+            category: firstTx.category,
+            glAccount: `${firstTx.glAccountCode} - ${firstTx.category}`,
+            confidence: 99.4,
+            matchedBankLine: firstTx.description
+          };
+
+          // Also inject all transactions into ledger
+          result.transactions.forEach((tx) => addTransaction(tx));
+
+          handleSelectDoc(newDoc);
+          showNotification(`Successfully extracted ${result.transactions.length} rows from ${file.name}!`);
+        } else {
+          showNotification(`Parsed ${file.name}`);
+        }
+      } catch (err) {
+        console.error('File parsing error:', err);
+        showNotification('Failed to parse file. Please upload a valid .xlsx or .csv.');
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   const handlePostToBooks = () => {
@@ -286,11 +338,11 @@ export const FinBooksLanding: React.FC<FinBooksLandingProps> = ({ onLaunchApp })
                   </span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Select a sample Indian financial document to watch the 4-step AI workflow in action:
+                  Select a preset document or upload your own Excel/CSV/PDF:
                 </p>
               </div>
 
-              {/* Sample Document Selectors */}
+              {/* Sample Document Selectors & Upload */}
               <div className="flex flex-wrap items-center gap-2">
                 {SAMPLE_DOCS.map((doc) => (
                   <button
@@ -305,6 +357,33 @@ export const FinBooksLanding: React.FC<FinBooksLandingProps> = ({ onLaunchApp })
                     {doc.name.replace('.pdf', '').replace('.png', '').replace('.csv', '')}
                   </button>
                 ))}
+
+                {/* Upload Test File Trigger */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept=".xlsx, .xls, .csv, .pdf"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-100/90 hover:bg-emerald-200 text-emerald-900 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm border border-emerald-300"
+                >
+                  <UploadCloud className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Upload Excel / File</span>
+                </button>
+
+                {/* Download Sample Excel Test File */}
+                <a
+                  href="/sample_bank_statement.xlsx"
+                  download="FinBooks_Test_Data_HDFC_Bank_and_Bills.xlsx"
+                  className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm"
+                  title="Download test Excel workbook with HDFC statement and GST bills"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Download Test Excel (.xlsx)</span>
+                </a>
               </div>
             </div>
 

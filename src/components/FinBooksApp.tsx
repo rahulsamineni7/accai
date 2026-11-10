@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Sparkles,
   UploadCloud,
@@ -19,10 +19,12 @@ import {
   Filter,
   AlertCircle,
   Eye,
-  Plus
+  Plus,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useDigits } from '../context/DigitsContext';
 import { askDigitsAI, FinancialContext } from '../services/geminiService';
+import { parseExcelOrCsv } from '../utils/excelParser';
 
 interface FinBooksAppProps {
   activeTab: 'overview' | 'documents' | 'reconciliation' | 'reports';
@@ -48,8 +50,11 @@ export const FinBooksApp: React.FC<FinBooksAppProps> = ({ activeTab, setActiveTa
     downloadTallyXml,
     downloadGstrJson,
     toggleTransactionMatch,
-    addTransaction
+    addTransaction,
+    showNotification
   } = useDigits();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // AI CFO State
   const [aiQuery, setAiQuery] = useState('');
@@ -197,6 +202,46 @@ export const FinBooksApp: React.FC<FinBooksAppProps> = ({ activeTab, setActiveTa
     setUploadedDocs((prev) =>
       prev.map((d) => (d.id === docId ? { ...d, status: 'Posted' } : d))
     );
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const buffer = evt.target?.result as ArrayBuffer;
+        const result = parseExcelOrCsv(buffer, file.name);
+
+        if (result.documents.length > 0) {
+          const newDocItems = result.documents.map((d, idx) => ({
+            id: `doc-${Date.now()}-${idx}`,
+            name: d.name,
+            vendor: d.vendor,
+            gstin: d.gstin,
+            amount: d.amount,
+            tax: d.tax,
+            category: d.category,
+            status: 'Ready to Post',
+            confidence: d.confidence,
+            date: d.date
+          }));
+          setUploadedDocs((prev) => [...newDocItems, ...prev]);
+        }
+
+        if (result.transactions.length > 0) {
+          result.transactions.forEach((tx) => addTransaction(tx));
+          showNotification(`Extracted ${result.transactions.length} rows from ${file.name} into live ledger!`);
+        } else {
+          showNotification(`Processed ${file.name}`);
+        }
+      } catch (err) {
+        console.error('File parsing error:', err);
+        showNotification('Failed to read file. Please ensure it is a valid .xlsx or .csv.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   return (
@@ -434,19 +479,54 @@ export const FinBooksApp: React.FC<FinBooksAppProps> = ({ activeTab, setActiveTa
             </div>
 
             {/* Dropzone */}
-            <div className="border-2 border-dashed border-emerald-500/40 rounded-2xl p-8 bg-emerald-50/20 text-center hover:bg-emerald-50/40 transition-all cursor-pointer flex flex-col items-center justify-center">
-              <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#0d9467] mb-3">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx, .xls, .csv, .pdf"
+              className="hidden"
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-emerald-500/40 rounded-2xl p-8 bg-emerald-50/20 text-center hover:bg-emerald-50/40 transition-all cursor-pointer flex flex-col items-center justify-center group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#0d9467] mb-3 group-hover:scale-110 transition-transform">
                 <UploadCloud className="w-6 h-6" />
               </div>
               <h4 className="text-sm font-bold text-slate-900 mb-1">
-                Click to browse or drag and drop financial documents
+                Click to browse or drag and drop financial documents (.xlsx, .csv, .pdf)
               </h4>
               <p className="text-xs text-slate-500 max-w-sm mb-4">
-                Supports PDF bank statements, vendor bills, PNG/JPEG receipts, and CSV settlement files up to 25MB
+                Supports Indian bank statement Excel/CSVs, vendor bills, and receipts with instant AI GL coding
               </p>
-              <div className="flex items-center gap-2 text-[11px] font-semibold text-emerald-800">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Encrypted &amp; Modulo-36 GSTIN verified</span>
+              
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-3 py-1 rounded-full">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Encrypted &amp; Modulo-36 GSTIN verified</span>
+                </div>
+
+                <a
+                  href="/sample_bank_statement.xlsx"
+                  download="FinBooks_Test_Data_HDFC_Bank_and_Bills.xlsx"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 px-3 py-1 rounded-full shadow-sm transition-all"
+                  title="Download test Excel with real HDFC transactions and GST bills"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Download Test Excel (.xlsx)</span>
+                </a>
+
+                <a
+                  href="/sample_bank_statement.csv"
+                  download="FinBooks_HDFC_Bank_Statement_Oct2026.csv"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1 rounded-full shadow-sm transition-all"
+                  title="Download test CSV format"
+                >
+                  <FileText className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Download Test CSV</span>
+                </a>
               </div>
             </div>
           </div>
