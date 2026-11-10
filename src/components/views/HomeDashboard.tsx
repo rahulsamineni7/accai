@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const HomeDashboard: React.FC = () => {
-  const { metrics, currentEntity, setActiveView, transactions, closeTasks } = useDigits();
+  const { metrics, currentEntity, setActiveView, transactions, closeTasks, formatAmount, chartOfAccounts } = useDigits();
 
   // Trailed monthly revenue vs burn bar data
   const monthlyFlows = [
@@ -77,11 +77,11 @@ export const HomeDashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight mb-1">
-            ${metrics.totalCash.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            {formatAmount(metrics.totalCash)}
           </div>
           <div className="flex items-center text-[11px] text-[#006c49] font-medium">
             <TrendingUp className="w-3.5 h-3.5 mr-1" />
-            <span>+$250k venture tranche in Nov</span>
+            <span>+{formatAmount(250000, { compact: true })} venture tranche in Nov</span>
           </div>
         </div>
 
@@ -111,12 +111,12 @@ export const HomeDashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl font-bold font-mono text-[#ba1a1a] tracking-tight mb-1">
-            -${Math.abs(metrics.netBurn).toLocaleString('en-US', { minimumFractionDigits: 0 })}
+            -{formatAmount(Math.abs(metrics.netBurn), { hideDecimals: true })}
           </div>
           <div className="flex items-center text-[11px] text-[#3d4a42]">
             <span>Gross Rev: </span>
             <span className="text-[#006c49] ml-1 font-mono font-medium">
-              ${(metrics.monthlyRevenue / 1000).toFixed(0)}k/mo
+              {formatAmount(metrics.monthlyRevenue, { compact: true })}/mo
             </span>
           </div>
         </div>
@@ -135,7 +135,7 @@ export const HomeDashboard: React.FC = () => {
           <div className="flex items-center text-[11px] text-[#3d4a42] font-medium">
             <span>COGS: </span>
             <span className="text-[#131b2e] ml-1 font-mono">
-              ${(metrics.monthlyCOGS / 1000).toFixed(1)}k/mo
+              {formatAmount(metrics.monthlyCOGS, { compact: true })}/mo
             </span>
           </div>
         </div>
@@ -177,13 +177,13 @@ export const HomeDashboard: React.FC = () => {
                     <div
                       style={{ height: `${revHeight}%` }}
                       className="w-5 md:w-8 bg-gradient-to-t from-[#006948] to-[#6cf8bb] rounded-t-xl transition-all group-hover:brightness-110 relative shadow-sm"
-                      title={`Revenue: $${item.rev.toLocaleString()}`}
+                      title={`Revenue: ${formatAmount(item.rev)}`}
                     />
                     {/* Expense Bar */}
                     <div
                       style={{ height: `${expHeight}%` }}
                       className="w-5 md:w-8 bg-gradient-to-t from-[#bccac0] to-[#dae2fd] rounded-t-xl transition-all group-hover:brightness-110 relative shadow-sm"
-                      title={`Expenses: $${item.exp.toLocaleString()}`}
+                      title={`Expenses: ${formatAmount(item.exp)}`}
                     />
                   </div>
                   <div className="text-[11px] font-mono text-[#3d4a42] mt-2.5 group-hover:text-[#131b2e] font-semibold transition-colors">
@@ -214,27 +214,27 @@ export const HomeDashboard: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="px-3.5 py-2.5 rounded-2xl bg-[#f2f3ff] border border-[#eaedff] flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-semibold text-[#131b2e]">Chase Operating Checking</div>
-                  <div className="text-[10px] text-[#3d4a42]">Account #4819</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-[#131b2e]">$1,142,390.12</div>
-                  <div className="text-[10px] text-[#3d4a42] font-mono">77.0%</div>
-                </div>
-              </div>
-
-              <div className="px-3.5 py-2.5 rounded-2xl bg-[#f2f3ff] border border-[#eaedff] flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-semibold text-[#131b2e]">Mercury Treasury Yield</div>
-                  <div className="text-[10px] text-[#3d4a42]">Account #9921 · 5.1% APY</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-[#131b2e]">$340,530.33</div>
-                  <div className="text-[10px] text-[#3d4a42] font-mono">23.0%</div>
-                </div>
-              </div>
+              {chartOfAccounts
+                .filter((a) => a.subcategory === 'Cash & Cash Equivalents' && a.balance > 0)
+                .slice(0, 3)
+                .map((acc) => {
+                  const pct = ((acc.balance / metrics.totalCash) * 100).toFixed(1);
+                  return (
+                    <div
+                      key={acc.id}
+                      className="px-3.5 py-2.5 rounded-2xl bg-[#f2f3ff] border border-[#eaedff] flex items-center justify-between hover:bg-[#eaedff]/60 transition-colors"
+                    >
+                      <div>
+                        <div className="text-xs font-semibold text-[#131b2e]">{acc.name}</div>
+                        <div className="text-[10px] text-[#3d4a42]">GL #{acc.code}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs font-mono font-bold text-[#131b2e]">{formatAmount(acc.balance)}</div>
+                        <div className="text-[10px] text-[#3d4a42] font-mono">{pct}%</div>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
 
@@ -300,7 +300,7 @@ export const HomeDashboard: React.FC = () => {
                       t.amount >= 0 ? 'text-[#006c49]' : 'text-[#131b2e]'
                     }`}
                   >
-                    {t.amount >= 0 ? '+' : ''}${Math.abs(t.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {t.amount >= 0 ? '+' : ''}{formatAmount(t.amount)}
                   </td>
                   <td className="py-2.5 px-3 text-center font-sans">
                     <span

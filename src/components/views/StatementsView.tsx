@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 export const StatementsView: React.FC = () => {
-  const { chartOfAccounts, currentEntity, showNotification } = useDigits();
+  const { chartOfAccounts, currentEntity, showNotification, formatAmount } = useDigits();
   const [statementType, setStatementType] = useState<'pnl' | 'balance' | 'cashflow'>('pnl');
   const [showPercentages, setShowPercentages] = useState(false);
   const [basis, setBasis] = useState<'Accrual' | 'Cash'>('Accrual');
@@ -184,11 +184,11 @@ export const StatementsView: React.FC = () => {
                   </td>
                   {monthWeights.map((w, idx) => (
                     <td key={idx} className="py-2.5 px-3 text-right text-[#131b2e]">
-                      ${(totalRevenue * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      {formatAmount(totalRevenue * w, { hideDecimals: true })}
                     </td>
                   ))}
                   <td className="py-2.5 px-4 text-right text-[#006c49] font-bold">
-                    ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalRevenue)}
                   </td>
                   {showPercentages && <td className="py-2.5 px-3 text-right text-[#3d4a42]">100.0%</td>}
                 </tr>
@@ -201,11 +201,11 @@ export const StatementsView: React.FC = () => {
                       </td>
                       {monthWeights.map((w, idx) => (
                         <td key={idx} className="py-2 px-3 text-right text-[#3d4a42]">
-                          ${(acc.balance * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          {formatAmount(acc.balance * w, { hideDecimals: true })}
                         </td>
                       ))}
                       <td className="py-2 px-4 text-right text-[#131b2e] font-medium">
-                        ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatAmount(acc.balance)}
                       </td>
                       {showPercentages && (
                         <td className="py-2 px-3 text-right text-[#3d4a42] text-[11px]">
@@ -226,11 +226,11 @@ export const StatementsView: React.FC = () => {
                   </td>
                   {monthWeights.map((w, idx) => (
                     <td key={idx} className="py-2.5 px-3 text-right text-[#131b2e]">
-                      ${(totalCOGS * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      {formatAmount(totalCOGS * w, { hideDecimals: true })}
                     </td>
                   ))}
                   <td className="py-2.5 px-4 text-right text-[#131b2e] font-bold">
-                    ${totalCOGS.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalCOGS)}
                   </td>
                   {showPercentages && (
                     <td className="py-2.5 px-3 text-right text-[#3d4a42]">
@@ -247,11 +247,11 @@ export const StatementsView: React.FC = () => {
                       </td>
                       {monthWeights.map((w, idx) => (
                         <td key={idx} className="py-2 px-3 text-right text-[#3d4a42]">
-                          ${(acc.balance * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          {formatAmount(acc.balance * w, { hideDecimals: true })}
                         </td>
                       ))}
                       <td className="py-2 px-4 text-right text-[#131b2e] font-medium">
-                        ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatAmount(acc.balance)}
                       </td>
                       {showPercentages && (
                         <td className="py-2 px-3 text-right text-[#3d4a42] text-[11px]">
@@ -266,11 +266,11 @@ export const StatementsView: React.FC = () => {
                   <td className="py-3 px-4 font-sans text-[#006c49]">GROSS PROFIT</td>
                   {monthWeights.map((w, idx) => (
                     <td key={idx} className="py-3 px-3 text-right text-[#006c49]">
-                      ${(grossProfit * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      {formatAmount(grossProfit * w, { hideDecimals: true })}
                     </td>
                   ))}
                   <td className="py-3 px-4 text-right text-[#006c49] font-bold">
-                    ${grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(grossProfit)}
                   </td>
                   {showPercentages && (
                     <td className="py-3 px-3 text-right text-[#006c49]">
@@ -290,11 +290,11 @@ export const StatementsView: React.FC = () => {
                   </td>
                   {monthWeights.map((w, idx) => (
                     <td key={idx} className="py-2.5 px-3 text-right text-[#131b2e]">
-                      ${(totalExpenses * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      {formatAmount(totalExpenses * w, { hideDecimals: true })}
                     </td>
                   ))}
                   <td className="py-2.5 px-4 text-right text-[#ba1a1a] font-bold">
-                    ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalExpenses)}
                   </td>
                   {showPercentages && (
                     <td className="py-2.5 px-3 text-right text-[#3d4a42]">
@@ -311,11 +311,11 @@ export const StatementsView: React.FC = () => {
                       </td>
                       {monthWeights.map((w, idx) => (
                         <td key={idx} className="py-2 px-3 text-right text-[#3d4a42]">
-                          ${(acc.balance * w).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          {formatAmount(acc.balance * w, { hideDecimals: true })}
                         </td>
                       ))}
                       <td className="py-2 px-4 text-right text-[#131b2e] font-medium">
-                        ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatAmount(acc.balance)}
                       </td>
                       {showPercentages && (
                         <td className="py-2 px-3 text-right text-[#3d4a42] text-[11px]">
@@ -339,7 +339,7 @@ export const StatementsView: React.FC = () => {
                           monthNet >= 0 ? 'text-[#006c49]' : 'text-[#ba1a1a]'
                         }`}
                       >
-                        ${monthNet.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        {formatAmount(monthNet, { hideDecimals: true })}
                       </td>
                     );
                   })}
@@ -348,7 +348,7 @@ export const StatementsView: React.FC = () => {
                       netIncome >= 0 ? 'text-[#006c49]' : 'text-[#ba1a1a]'
                     }`}
                   >
-                    ${netIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(netIncome)}
                   </td>
                   {showPercentages && (
                     <td
@@ -382,7 +382,7 @@ export const StatementsView: React.FC = () => {
                       {acc.subcategory}
                     </td>
                     <td className="py-2 px-4 text-right text-[#131b2e] font-bold">
-                      ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatAmount(acc.balance)}
                     </td>
                   </tr>
                 ))}
@@ -390,7 +390,7 @@ export const StatementsView: React.FC = () => {
                   <td className="py-2.5 px-4 font-sans">TOTAL ASSETS</td>
                   <td colSpan={5}></td>
                   <td className="py-2.5 px-4 text-right">
-                    ${totalAssets.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalAssets)}
                   </td>
                 </tr>
 
@@ -410,7 +410,7 @@ export const StatementsView: React.FC = () => {
                       {acc.subcategory}
                     </td>
                     <td className="py-2 px-4 text-right text-[#131b2e] font-bold">
-                      ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatAmount(acc.balance)}
                     </td>
                   </tr>
                 ))}
@@ -418,7 +418,7 @@ export const StatementsView: React.FC = () => {
                   <td className="py-2.5 px-4 font-sans">TOTAL LIABILITIES</td>
                   <td colSpan={5}></td>
                   <td className="py-2.5 px-4 text-right">
-                    ${totalLiabilities.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalLiabilities)}
                   </td>
                 </tr>
 
@@ -438,7 +438,7 @@ export const StatementsView: React.FC = () => {
                       {acc.subcategory}
                     </td>
                     <td className="py-2 px-4 text-right text-[#131b2e] font-bold">
-                      ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatAmount(acc.balance)}
                     </td>
                   </tr>
                 ))}
@@ -450,14 +450,14 @@ export const StatementsView: React.FC = () => {
                     Current Year Retained Earnings
                   </td>
                   <td className={`py-2 px-4 text-right font-bold ${netIncome >= 0 ? 'text-[#006c49]' : 'text-[#ba1a1a]'}`}>
-                    ${netIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(netIncome)}
                   </td>
                 </tr>
                 <tr className="bg-[#f2f3ff] font-bold text-[#131b2e]">
                   <td className="py-2.5 px-4 font-sans">TOTAL EQUITY</td>
                   <td colSpan={5}></td>
                   <td className="py-2.5 px-4 text-right">
-                    ${totalEquity.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalEquity)}
                   </td>
                 </tr>
 
@@ -469,7 +469,7 @@ export const StatementsView: React.FC = () => {
                   </td>
                   <td colSpan={5}></td>
                   <td className="py-3.5 px-4 text-right text-[#006c49] font-bold text-sm">
-                    ${(totalLiabilities + totalEquity).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalLiabilities + totalEquity)}
                   </td>
                 </tr>
               </tbody>
@@ -487,24 +487,24 @@ export const StatementsView: React.FC = () => {
                   <td className="py-2 px-8 font-sans text-[#131b2e]">Net Operating Income</td>
                   <td colSpan={5}></td>
                   <td className="py-2 px-4 text-right text-[#ba1a1a] font-medium">
-                    ${netIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(netIncome)}
                   </td>
                 </tr>
                 <tr className="hover:bg-[#f2f3ff]/40">
                   <td className="py-2 px-8 font-sans text-[#131b2e]">Add Back: Non-Cash Depreciation</td>
                   <td colSpan={5}></td>
-                  <td className="py-2 px-4 text-right text-[#006c49] font-medium">+$26,400.00</td>
+                  <td className="py-2 px-4 text-right text-[#006c49] font-medium">+{formatAmount(26400)}</td>
                 </tr>
                 <tr className="hover:bg-[#f2f3ff]/40">
                   <td className="py-2 px-8 font-sans text-[#131b2e]">Change in Accounts Receivable</td>
                   <td colSpan={5}></td>
-                  <td className="py-2 px-4 text-right text-[#ba1a1a] font-medium">-$14,200.00</td>
+                  <td className="py-2 px-4 text-right text-[#ba1a1a] font-medium">-{formatAmount(14200)}</td>
                 </tr>
                 <tr className="bg-[#f2f3ff] font-bold text-[#131b2e]">
                   <td className="py-2.5 px-4 font-sans">Net Cash from Operating Activities</td>
                   <td colSpan={5}></td>
                   <td className="py-2.5 px-4 text-right text-[#ba1a1a]">
-                    ${(netIncome + 26400 - 14200).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(netIncome + 26400 - 14200)}
                   </td>
                 </tr>
 
@@ -516,12 +516,12 @@ export const StatementsView: React.FC = () => {
                 <tr className="hover:bg-[#f2f3ff]/40">
                   <td className="py-2 px-8 font-sans text-[#131b2e]">Proceeds from SAFE / Venture Tranche</td>
                   <td colSpan={5}></td>
-                  <td className="py-2 px-4 text-right text-[#006c49] font-medium">+$250,000.00</td>
+                  <td className="py-2 px-4 text-right text-[#006c49] font-medium">+{formatAmount(250000)}</td>
                 </tr>
                 <tr className="bg-[#f2f3ff] font-bold text-[#131b2e]">
                   <td className="py-2.5 px-4 font-sans">Net Cash from Financing Activities</td>
                   <td colSpan={5}></td>
-                  <td className="py-2.5 px-4 text-right text-[#006c49]">+$250,000.00</td>
+                  <td className="py-2.5 px-4 text-right text-[#006c49]">+{formatAmount(250000)}</td>
                 </tr>
 
                 <tr className="bg-[#f2f3ff] font-bold border-t-2 border-[#eaedff] text-[#131b2e]">
@@ -530,7 +530,7 @@ export const StatementsView: React.FC = () => {
                   </td>
                   <td colSpan={5}></td>
                   <td className="py-3.5 px-4 text-right text-[#006c49] font-bold text-sm">
-                    ${(1142390.12 + 340530.33 + 24890.50).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {formatAmount(1142390.12 + 340530.33 + 24890.50)}
                   </td>
                 </tr>
               </tbody>

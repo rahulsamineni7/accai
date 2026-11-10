@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDigits } from '../../context/DigitsContext';
 
 interface BillItem {
   id: string;
@@ -15,16 +16,64 @@ interface BillItem {
   ein: string;
   disbursementRoute: string;
   netTerms: string;
+  msmeTier?: 'Micro' | 'Small' | 'Medium';
+  tdsSection?: string;
   lineItems: { label: string; amount: string }[];
 }
 
 export const BillPayView: React.FC = () => {
+  const { currentEntity, formatAmount, currency, showNotification } = useDigits();
   const [filter, setFilter] = useState<'All' | 'Awaiting Approval' | 'Scheduled' | 'Paid' | 'Overdue'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillItem | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [bills, setBills] = useState<BillItem[]>([
+    {
+      id: 'b-in-1',
+      vendor: 'CtrlS Datacenters Ltd',
+      logoLetters: 'CS',
+      desc: 'Tier-4 Colocation & Bare-Metal AI Servers (Bengaluru DC)',
+      invoiceRef: 'CS-KA-2024-8819',
+      dateIssued: 'Oct 14, 2026',
+      dateDue: 'MSME: 11 days left',
+      glCode: '#5020 • Cloud Infrastructure',
+      amount: 284000,
+      status: 'Awaiting Approval',
+      ocrConfidence: '99.8%',
+      ein: '29AABCC7712E1ZQ',
+      disbursementRoute: 'HDFC RTGS Direct Hook',
+      netTerms: 'Sec 37(2)(g) MSME (15-Day Lock)',
+      msmeTier: 'Micro',
+      tdsSection: '194C (2%)',
+      lineItems: [
+        { label: 'H100 8-GPU Pod Colocation Rack (42U)', amount: '₹2,40,678.00' },
+        { label: 'IGST (18%) Input Tax Credit', amount: '₹43,322.00' },
+        { label: 'TDS Deduction u/s 194C (-2%)', amount: '-₹4,813.56' }
+      ]
+    },
+    {
+      id: 'b-in-2',
+      vendor: 'AZB & Partners Legal Advisors',
+      logoLetters: 'AZ',
+      desc: 'MCA Board Resolution & RBI Foreign Investment Compliance',
+      invoiceRef: 'AZB-DEL-9018',
+      dateIssued: 'Oct 12, 2026',
+      dateDue: 'Due in 6 days',
+      glCode: '#6050 • Legal & Professional',
+      amount: 175000,
+      status: 'Awaiting Approval',
+      ocrConfidence: '99.9%',
+      ein: '07AAACA1991F1ZY',
+      disbursementRoute: 'ICICI Bank NEFT / IMPS',
+      netTerms: 'Net 15',
+      tdsSection: '194J (10%)',
+      lineItems: [
+        { label: 'FDI Compliance Advisory & Form FC-GPR Filing', amount: '₹1,48,305.00' },
+        { label: 'CGST (9%) + SGST (9%)', amount: '₹26,695.00' },
+        { label: 'TDS Deduction u/s 194J (-10%)', amount: '-₹14,830.50' }
+      ]
+    },
     {
       id: 'b1',
       vendor: 'CoreWeave Cloud',
@@ -270,14 +319,16 @@ export const BillPayView: React.FC = () => {
               <span className="material-symbols-outlined text-[#006c49] text-xl">pending_actions</span>
             </div>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="font-mono text-3xl text-[#131b2e] font-bold">$148,250.00</span>
+              <span className="font-mono text-3xl text-[#131b2e] font-bold">
+                {formatAmount(bills.filter((b) => b.status === 'Awaiting Approval').reduce((s, b) => s + b.amount, 0))}
+              </span>
             </div>
             <div className="mt-3 flex items-center justify-between">
               <span className="inline-flex items-center gap-1 font-mono text-xs text-[#006c49] bg-[#6cf8bb]/30 px-2 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#006c49]" />
-                4 Invoices Pending
+                {bills.filter((b) => b.status === 'Awaiting Approval').length} Invoices Pending
               </span>
-              <span className="text-xs text-[#3d4a42]">2 high priority</span>
+              <span className="text-xs text-[#3d4a42]">Section 37(2)(g) Guard</span>
             </div>
           </div>
 
@@ -288,11 +339,13 @@ export const BillPayView: React.FC = () => {
               <span className="material-symbols-outlined text-[#006948] text-xl">schedule_send</span>
             </div>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="font-mono text-3xl text-[#131b2e] font-bold">$264,550.00</span>
+              <span className="font-mono text-3xl text-[#131b2e] font-bold">
+                {formatAmount(bills.filter((b) => b.status === 'Scheduled ACH').reduce((s, b) => s + b.amount, 0) || 264550)}
+              </span>
             </div>
             <div className="mt-3 flex items-center justify-between">
               <span className="text-xs text-[#3d4a42]">Due this week (5 batches)</span>
-              <span className="font-mono text-xs text-[#006948] font-semibold">ACH Direct</span>
+              <span className="font-mono text-xs text-[#006948] font-semibold">RTGS / ACH Direct</span>
             </div>
           </div>
 
@@ -303,7 +356,9 @@ export const BillPayView: React.FC = () => {
               <span className="material-symbols-outlined text-[#006c49] text-xl">verified</span>
             </div>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="font-mono text-3xl text-[#131b2e] font-bold">$890,200.00</span>
+              <span className="font-mono text-3xl text-[#131b2e] font-bold">
+                {formatAmount(bills.filter((b) => b.status === 'Paid').reduce((s, b) => s + b.amount, 0) || 890200)}
+              </span>
             </div>
             <div className="mt-3 flex items-center gap-2">
               <span className="font-mono text-xs text-[#006c49] bg-[#6cf8bb]/40 px-2 py-0.5 rounded-full font-semibold">
@@ -343,7 +398,7 @@ export const BillPayView: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Spotlight Card 1: CoreWeave */}
+            {/* Spotlight Card 1 */}
             <div className="relative p-6 rounded-2xl bg-white/90 backdrop-blur-2xl shadow-[0_10px_30px_-5px_rgba(15,23,42,0.05)] border border-[#eaedff] hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -352,30 +407,37 @@ export const BillPayView: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base text-[#131b2e] font-bold">CoreWeave Cloud</h3>
-                      <span className="text-xs text-[#006c49] bg-[#6cf8bb]/40 px-2 py-0.5 rounded-full font-semibold">
-                        Tier-1 Critical
-                      </span>
+                      <h3 className="text-base text-[#131b2e] font-bold">{bills[0]?.vendor}</h3>
+                      {bills[0]?.msmeTier && (
+                        <span className="text-xs text-[#006c49] bg-[#6cf8bb]/40 px-2 py-0.5 rounded-full font-semibold">
+                          MSME {bills[0].msmeTier}
+                        </span>
+                      )}
+                      {bills[0]?.tdsSection && (
+                        <span className="text-xs text-[#006948] bg-[#eaedff] px-2 py-0.5 rounded-full font-medium">
+                          TDS {bills[0].tdsSection}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-[#3d4a42] mt-0.5">
-                      AI Inference • 64x H100 Cluster Reserved Instances (March)
+                      {bills[0]?.desc}
                     </p>
                     <div className="mt-2 flex items-center gap-3 font-mono text-xs text-[#3d4a42]">
-                      <span>Inv #CW-89240-X</span>
+                      <span>Inv #{bills[0]?.invoiceRef}</span>
                       <span>•</span>
-                      <span className="text-[#ba1a1a] font-medium">Due in 3 days</span>
+                      <span className="text-[#ba1a1a] font-medium">{bills[0]?.dateDue}</span>
                       <span>•</span>
-                      <span>GL #5020 (Cloud Compute)</span>
+                      <span>{bills[0]?.glCode}</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="font-mono text-2xl text-[#131b2e] font-bold block">$84,500.00</span>
-                  <span className="text-xs text-[#006c49] font-medium">Auto-matched with AWS/GCP PoC</span>
+                  <span className="font-mono text-2xl text-[#131b2e] font-bold block">{formatAmount(bills[0]?.amount || 0)}</span>
+                  <span className="text-xs text-[#006c49] font-medium">Gemini 2.5 OCR Verified</span>
                 </div>
               </div>
 
-              {/* Bottom Row: Inline PDF preview pill & Actions */}
+              {/* Bottom Row */}
               <div className="mt-6 pt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#f2f3ff]/50 -mx-6 -mb-6 p-4 px-6 border-t border-[#eaedff]">
                 <button
                   onClick={() => openInspectionDrawer(bills[0])}
@@ -383,7 +445,7 @@ export const BillPayView: React.FC = () => {
                   type="button"
                 >
                   <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-                  <span>Inspect Gemini OCR Trace (99.8%)</span>
+                  <span>Inspect OCR Trace ({bills[0]?.ocrConfidence})</span>
                   <span className="material-symbols-outlined text-base">chevron_right</span>
                 </button>
                 <div className="flex items-center gap-2">
@@ -394,18 +456,18 @@ export const BillPayView: React.FC = () => {
                     Hold
                   </button>
                   <button
-                    onClick={() => handleApproveBill('b1')}
+                    onClick={() => handleApproveBill(bills[0]?.id)}
                     className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#006948] hover:bg-[#00855d] text-white text-xs font-semibold shadow-sm transition-all"
                     type="button"
                   >
                     <span className="material-symbols-outlined text-base">task_alt</span>
-                    <span>1-Click Approve ACH</span>
+                    <span>1-Click Approve Disbursement</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Spotlight Card 2: Latham & Watkins LLP */}
+            {/* Spotlight Card 2 */}
             <div className="relative p-6 rounded-2xl bg-white/90 backdrop-blur-2xl shadow-[0_10px_30px_-5px_rgba(15,23,42,0.05)] border border-[#eaedff] hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -414,25 +476,27 @@ export const BillPayView: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base text-[#131b2e] font-bold">Latham & Watkins LLP</h3>
-                      <span className="text-xs text-[#3d4a42] bg-[#eaedff] px-2 py-0.5 rounded-full font-medium">
-                        Corporate Legal
-                      </span>
+                      <h3 className="text-base text-[#131b2e] font-bold">{bills[1]?.vendor}</h3>
+                      {bills[1]?.tdsSection && (
+                        <span className="text-xs text-[#006948] bg-[#eaedff] px-2 py-0.5 rounded-full font-medium">
+                          TDS {bills[1].tdsSection}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-[#3d4a42] mt-0.5">
-                      Series B Financing Restructuring & IP Transfer Filings
+                      {bills[1]?.desc}
                     </p>
                     <div className="mt-2 flex items-center gap-3 font-mono text-xs text-[#3d4a42]">
-                      <span>Inv #LW-440219</span>
+                      <span>Inv #{bills[1]?.invoiceRef}</span>
                       <span>•</span>
-                      <span>Due in 5 days</span>
+                      <span>{bills[1]?.dateDue}</span>
                       <span>•</span>
-                      <span>GL #6050 (Legal & Professional)</span>
+                      <span>{bills[1]?.glCode}</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="font-mono text-2xl text-[#131b2e] font-bold block">$32,000.00</span>
+                  <span className="font-mono text-2xl text-[#131b2e] font-bold block">{formatAmount(bills[1]?.amount || 0)}</span>
                   <span className="text-xs text-[#3d4a42]">Pre-authorized via SOW</span>
                 </div>
               </div>
@@ -456,7 +520,7 @@ export const BillPayView: React.FC = () => {
                     Question
                   </button>
                   <button
-                    onClick={() => handleApproveBill('b2')}
+                    onClick={() => handleApproveBill(bills[1]?.id)}
                     className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#006948] hover:bg-[#00855d] text-white text-xs font-semibold shadow-sm transition-all"
                     type="button"
                   >
@@ -555,7 +619,19 @@ export const BillPayView: React.FC = () => {
                             {item.logoLetters}
                           </div>
                           <div>
-                            <span className="text-xs font-semibold text-[#131b2e] block">{item.vendor}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-xs font-semibold text-[#131b2e]">{item.vendor}</span>
+                              {item.msmeTier && (
+                                <span className="text-[9px] font-bold text-[#006c49] bg-[#6cf8bb]/40 px-1.5 py-0.5 rounded-full">
+                                  MSME {item.msmeTier}
+                                </span>
+                              )}
+                              {item.tdsSection && (
+                                <span className="text-[9px] font-medium text-[#006948] bg-[#eaedff] px-1.5 py-0.5 rounded-full">
+                                  TDS {item.tdsSection}
+                                </span>
+                              )}
+                            </div>
                             <span className="text-[11px] text-[#3d4a42]">{item.desc}</span>
                           </div>
                         </div>
@@ -563,7 +639,7 @@ export const BillPayView: React.FC = () => {
                       <td className="py-3 px-3 font-mono text-xs text-[#131b2e]">{item.invoiceRef}</td>
                       <td className="py-3 px-3">
                         <div className="font-mono text-xs text-[#131b2e]">{item.dateIssued}</div>
-                        <div className={`font-mono text-[11px] ${item.dateDue.includes('Due in') ? 'text-[#ba1a1a] font-medium' : 'text-[#3d4a42]'}`}>
+                        <div className={`font-mono text-[11px] ${item.dateDue.includes('Due in') || item.dateDue.includes('MSME') ? 'text-[#ba1a1a] font-medium' : 'text-[#3d4a42]'}`}>
                           {item.dateDue}
                         </div>
                       </td>
@@ -573,7 +649,7 @@ export const BillPayView: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3 px-3 text-right font-mono text-xs text-[#131b2e] font-semibold">
-                        ${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {formatAmount(item.amount)}
                       </td>
                       <td className="py-3 px-3 text-center">
                         <span
@@ -743,7 +819,7 @@ export const BillPayView: React.FC = () => {
                   <div className="pt-2 border-t border-[#eaedff] flex items-center justify-between font-bold">
                     <span className="text-[#131b2e]">Total Parsed Amount</span>
                     <span className="font-mono text-xl text-[#006948]">
-                      ${selectedBill.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {formatAmount(selectedBill.amount)}
                     </span>
                   </div>
                 </div>

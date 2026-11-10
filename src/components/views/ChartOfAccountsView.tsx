@@ -45,7 +45,7 @@ interface GLGroup {
 }
 
 export const ChartOfAccountsView: React.FC = () => {
-  const { showNotification, setActiveView } = useDigits();
+  const { showNotification, setActiveView, formatAmount, currency } = useDigits();
 
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -380,7 +380,7 @@ export const ChartOfAccountsView: React.FC = () => {
               <DollarSign className="w-4 h-4 text-[#006c49] group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2">
-              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">$14,820,450.00</div>
+              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">{formatAmount(14820450)}</div>
               <div className="flex items-center gap-1 mt-1 text-xs">
                 <TrendingUp className="w-3.5 h-3.5 text-[#006c49]" />
                 <span className="font-mono text-[#006c49] font-semibold">+8.4% MoM</span>
@@ -396,7 +396,7 @@ export const ChartOfAccountsView: React.FC = () => {
               <CreditCard className="w-4 h-4 text-[#6d7a72] group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2">
-              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">$1,240,110.00</div>
+              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">{formatAmount(1240110)}</div>
               <div className="flex items-center gap-1 mt-1 text-xs">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#006c49]" />
                 <span className="font-mono text-[#006c49] font-semibold">30d DPO Healthy</span>
@@ -412,7 +412,7 @@ export const ChartOfAccountsView: React.FC = () => {
               <PieChart className="w-4 h-4 text-[#006948] group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2">
-              <div className="text-2xl font-bold font-mono text-[#006948] tracking-tight">$13,580,340.00</div>
+              <div className="text-2xl font-bold font-mono text-[#006948] tracking-tight">{formatAmount(13580340)}</div>
               <div className="flex items-center gap-1 mt-1 text-xs">
                 <span className="font-mono text-[#6d7a72]">A = L + E</span>
                 <span className="font-mono text-[#006c49] font-bold ml-1">Strict Match</span>
@@ -427,7 +427,7 @@ export const ChartOfAccountsView: React.FC = () => {
               <TrendingUp className="w-4 h-4 text-[#006c49] group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2">
-              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">$4,890,200.00</div>
+              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">{formatAmount(4890200)}</div>
               <div className="flex items-center gap-1 mt-1 text-xs">
                 <TrendingUp className="w-3.5 h-3.5 text-[#006c49]" />
                 <span className="font-mono text-[#006c49] font-semibold">+19.2% YoY</span>
@@ -443,9 +443,9 @@ export const ChartOfAccountsView: React.FC = () => {
               <Activity className="w-4 h-4 text-[#6d7a72] group-hover:scale-110 transition-transform" />
             </div>
             <div className="mt-2">
-              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">$2,140,800.00</div>
+              <div className="text-2xl font-bold font-mono text-[#131b2e] tracking-tight">{formatAmount(2140800)}</div>
               <div className="flex items-center gap-1 mt-1 text-xs">
-                <span className="font-mono text-[#6d7a72]">Burn: $178k/mo</span>
+                <span className="font-mono text-[#6d7a72]">Burn: {formatAmount(178000, { compact: true })}/mo</span>
                 <span className="font-mono text-[#006c49] font-bold ml-1">28 mo Run</span>
               </div>
             </div>
@@ -602,7 +602,7 @@ export const ChartOfAccountsView: React.FC = () => {
                         {group.accounts.length} Active Accounts
                       </span>
                       <span className="font-mono text-sm font-bold text-[#131b2e]">
-                        ${group.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatAmount(group.total)}
                       </span>
                     </div>
                   </div>
@@ -642,7 +642,7 @@ export const ChartOfAccountsView: React.FC = () => {
                           {/* Balance */}
                           <div className="col-span-3 sm:col-span-2 text-right">
                             <div className="font-mono font-bold text-[#131b2e]">
-                              ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                              {formatAmount(acc.balance)}
                             </div>
                             {acc.balanceSubtitle && (
                               <span className="text-[10px] text-[#006c49] font-medium font-mono">
