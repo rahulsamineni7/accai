@@ -329,3 +329,4 @@ export const PracticePortalView: React.FC = () => {
     </div>
   );
 };
+
